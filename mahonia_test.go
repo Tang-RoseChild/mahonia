@@ -57,15 +57,14 @@ var testData = []struct {
 }
 
 func TestDecode(t *testing.T) {
-	utf8 := GetCharset("UTF-8")
 	for _, data := range testData {
-		cs := GetCharset(data.otherEncoding)
-		if cs == nil {
+		d := NewDecoder(data.otherEncoding)
+		if d == nil {
 			t.Errorf("Could not create decoder for %s", data.otherEncoding)
 			continue
 		}
 
-		str := ConvertString(data.other, cs, utf8)
+		str := d.ConvertString(data.other)
 
 		if str != data.utf8 {
 			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.utf8)
@@ -74,15 +73,14 @@ func TestDecode(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
-	utf8 := GetCharset("UTF-8")
 	for _, data := range testData {
-		cs := GetCharset(data.otherEncoding)
-		if cs == nil {
+		e := NewEncoder(data.otherEncoding)
+		if e == nil {
 			t.Errorf("Could not create encoder for %s", data.otherEncoding)
 			continue
 		}
 
-		str := ConvertString(data.utf8, utf8, cs)
+		str := e.ConvertString(data.utf8)
 
 		if str != data.other {
 			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.other)

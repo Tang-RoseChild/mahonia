@@ -52,52 +52,6 @@ type Charset struct {
 	NewEncoder func() Encoder
 }
 
-// ConvertString converts a string from one encoding to another.
-func ConvertString(s string, from, to *Charset) string {
-	source := []byte(s)
-	destPos := 0
-	dest := make([]byte, len(s)+10)
-
-	decodeRune := from.NewDecoder()
-	encodeRune := to.NewEncoder()
-
-	for len(source) > 0 {
-		rune, size, status := decodeRune(source)
-
-		if status == STATE_ONLY {
-			source = source[size:]
-			continue
-		}
-
-		if status == NO_ROOM {
-			rune = 0xfffd
-			size = len(source)
-			status = INVALID_CHAR
-		}
-
-		source = source[size:]
-
-	write:
-		size, status = encodeRune(dest[destPos:], rune)
-
-		if status == NO_ROOM {
-			newDest := make([]byte, len(dest)*2)
-			copy(newDest, dest)
-			dest = newDest
-			goto write
-		}
-
-		if status == STATE_ONLY {
-			destPos += size
-			goto write
-		}
-
-		destPos += size
-	}
-
-	return string(dest[:destPos])
-}
-
 // The charsets are stored in charsets under their canonical names. 
 var charsets = make(map[string]*Charset)
 
