@@ -13,6 +13,7 @@ GOFILES=charset.go \
 	jis0208-data.go \
 	shiftjis.go \
 	convert_string.go \
+	reader.go \
 	
 
 include $(GOROOT)/src/Make.pkg

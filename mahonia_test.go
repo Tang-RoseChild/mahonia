@@ -1,6 +1,10 @@
 package mahonia
 
-import "testing"
+import (
+	"testing"
+	"bytes"
+	"io/ioutil"
+)
 
 var nameTests = map[string]string{
 	"utf8":       "utf8",
@@ -84,6 +88,25 @@ func TestEncode(t *testing.T) {
 
 		if str != data.other {
 			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.other)
+		}
+	}
+}
+
+func TestReader(t *testing.T) {
+	for _, data := range testData {
+		d := NewDecoder(data.otherEncoding)
+		if d == nil {
+			t.Errorf("Could not create decoder for %s", data.otherEncoding)
+			continue
+		}
+
+		b := bytes.NewBufferString(data.other)
+		r := d.NewReader(b)
+		result, _ := ioutil.ReadAll(r)
+		str := string(result)
+
+		if str != data.utf8 {
+			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.utf8)
 		}
 	}
 }
