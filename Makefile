@@ -14,6 +14,7 @@ GOFILES=charset.go \
 	shiftjis.go \
 	convert_string.go \
 	reader.go \
+	writer.go \
 	
 
 include $(GOROOT)/src/Make.pkg

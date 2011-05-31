@@ -110,3 +110,22 @@ func TestReader(t *testing.T) {
 		}
 	}
 }
+
+func TestWriter(t *testing.T) {
+	for _, data := range testData {
+		e := NewEncoder(data.otherEncoding)
+		if e == nil {
+			t.Errorf("Could not create encoder for %s", data.otherEncoding)
+			continue
+		}
+
+		b := new(bytes.Buffer)
+		w := e.NewWriter(b)
+		w.Write([]byte(data.utf8))
+		str := b.String()
+
+		if str != data.other {
+			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.other)
+		}
+	}
+}
