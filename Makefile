@@ -15,6 +15,8 @@ GOFILES=charset.go \
 	convert_string.go \
 	reader.go \
 	writer.go \
+	jis0212-data.go \
+	mbcs.go \
 	
 
 include $(GOROOT)/src/Make.pkg
