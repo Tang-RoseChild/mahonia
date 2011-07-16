@@ -18,6 +18,7 @@ GOFILES=charset.go \
 	jis0212-data.go \
 	mbcs.go \
 	euc-jp.go \
+	translate.go \
 	
 
 include $(GOROOT)/src/Make.pkg
