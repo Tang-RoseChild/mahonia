@@ -4,7 +4,6 @@ import (
 	"testing"
 	"bytes"
 	"io/ioutil"
-    "saschapeilicke-go-charset.googlecode.com/hg/charset"
 )
 
 var nameTests = map[string]string{
@@ -147,67 +146,4 @@ func TestWriter(t *testing.T) {
 			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.other)
 		}
 	}
-}
-
-func BenchmarkMahoniaUTF8ToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    d := NewDecoder("UTF-8")
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = d.Translate(jis, true)
-    }
-}
-
-func BenchmarkCharsetUTF8ToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    info := charset.Info("UTF-8")
-    tr, _ := info.TranslatorFrom()
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = tr.Translate(jis, true)
-    }
-}
-
-func BenchmarkMahoniaAnsiToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    d := NewDecoder("windows-1252")
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = d.Translate(jis, true)
-    }
-}
-
-func BenchmarkCharsetAnsiToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    info := charset.Info("windows-1252")
-    tr, _ := info.TranslatorFrom()
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = tr.Translate(jis, true)
-    }
-}
-
-func BenchmarkMahoniaSjisToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    d := NewDecoder("shift-jis")
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = d.Translate(jis, true)
-    }
-}
-
-func BenchmarkCharsetSjisToUTF8(b *testing.B) {
-    b.StopTimer()
-    jis, _ := ioutil.ReadFile("/Users/andy/Programs/Go/mahonia/jis0208-data.go")
-    info := charset.Info("shift-jis")
-    tr, _ := info.TranslatorFrom()
-    b.StartTimer()
-    for i := 0; i < b.N; i++ {
-        _, _, _ = tr.Translate(jis, true)
-    }
 }
