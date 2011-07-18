@@ -84,8 +84,8 @@ func TestDecodeTranslate(t *testing.T) {
 			t.Errorf("Could not create decoder for %s", data.otherEncoding)
 			continue
 		}
-        
-        _, cdata, _ := d.Translate([]byte(data.other), true)
+
+		_, cdata, _ := d.Translate([]byte(data.other), true)
 		str := string(cdata)
 
 		if str != data.utf8 {
@@ -145,5 +145,15 @@ func TestWriter(t *testing.T) {
 		if str != data.other {
 			t.Errorf("Unexpected value: %#v (expected %#v)", str, data.other)
 		}
+	}
+}
+
+func TestFallback(t *testing.T) {
+	mixed := "résum\xe9 " // The space is needed because of the issue mentioned in the Note: in fallback.go
+	pure := "résumé "
+	d := FallbackDecoder(NewDecoder("utf8"), NewDecoder("ISO-8859-1"))
+	result := d.ConvertString(mixed)
+	if result != pure {
+		t.Errorf("Unexpected value: %#v (expected %#v)", result, pure)
 	}
 }

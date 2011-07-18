@@ -19,6 +19,6 @@ GOFILES=charset.go \
 	mbcs.go \
 	euc-jp.go \
 	translate.go \
-	
+	fallback.go \
 
 include $(GOROOT)/src/Make.pkg

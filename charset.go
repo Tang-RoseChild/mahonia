@@ -11,7 +11,7 @@ type Status int
 
 const (
 	// SUCCESS means that the character was converted with no problems.
-	SUCCESS = iota
+	SUCCESS = Status(iota)
 
 	// INVALID_CHAR means that the source contained invalid bytes, or that the character
 	// could not be represented in the destination encoding.
