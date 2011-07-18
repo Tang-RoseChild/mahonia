@@ -20,5 +20,7 @@ GOFILES=charset.go \
 	euc-jp.go \
 	translate.go \
 	fallback.go \
+	entity_data.go \
+	entity.go \
 
 include $(GOROOT)/src/Make.pkg

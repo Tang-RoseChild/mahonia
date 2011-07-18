@@ -157,3 +157,13 @@ func TestFallback(t *testing.T) {
 		t.Errorf("Unexpected value: %#v (expected %#v)", result, pure)
 	}
 }
+
+func TestEntities(t *testing.T) {
+	escaped := "&notit; I'm &notin; I tell you&#X82&#32;&nLt; "
+	plain := "¬it; I'm ∉ I tell you\u201a \u226A\u20D2 "
+	d := FallbackDecoder(EntityDecoder(), NewDecoder("ISO-8859-1"))
+	result := d.ConvertString(escaped)
+	if result != plain {
+		t.Errorf("Unexpected value: %#v (expected %#v)", result, plain)
+	}
+}
