@@ -58,14 +58,14 @@ func EntityDecoder() Decoder {
 		}
 
 		if p[0] != '&' {
-			return 0, 1, INVALID_CHAR
+			return 0xfffd, 1, INVALID_CHAR
 		}
 
 		if len(p) < 3 {
 			return 0, 1, NO_ROOM
 		}
 
-		size, status = 1, INVALID_CHAR
+		rune, size, status = 0xfffd, 1, INVALID_CHAR
 		n := 1 // number of bytes read so far
 
 		if p[n] == '#' {
@@ -116,7 +116,7 @@ func EntityDecoder() Decoder {
 			n--
 			// Now n is the number of actual digits read.
 			if n == 0 {
-				return 0, 1, INVALID_CHAR
+				return 0xfffd, 1, INVALID_CHAR
 			}
 
 			if 0x80 <= x && x <= 0x9F {
@@ -124,7 +124,7 @@ func EntityDecoder() Decoder {
 				x = replacementTable[x-0x80]
 			} else if x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF {
 				// Replace invalid characters with the replacement character.
-				x = '\uFFFD'
+				return 0xfffd, size, INVALID_CHAR
 			}
 
 			rune = x
