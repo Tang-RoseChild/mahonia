@@ -107,7 +107,12 @@ func (b *Reader) Read(p []byte) (n int, err os.Error) {
 		}
 
 		b.r += size
-		i += utf8.EncodeRune(p[i:], rune)
+		if rune < 128 {
+			p[i] = byte(rune)
+			i++
+		} else {
+			i += utf8.EncodeRune(p[i:], rune)
+		}
 	}
 
 	return i, nil
