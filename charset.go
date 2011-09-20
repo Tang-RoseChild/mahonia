@@ -87,11 +87,13 @@ func RegisterCharset(cs *Charset) {
 }
 
 // GetCharset fetches a charset by name.
+// If the name is not found, it returns nil.
 func GetCharset(name string) *Charset {
 	return charsets[aliases[simplifyName(name)]]
 }
 
 // NewDecoder returns a Decoder to decode the named charset.
+// If the name is not found, it returns nil.
 func NewDecoder(name string) Decoder {
 	cs := GetCharset(name)
 	if cs == nil {

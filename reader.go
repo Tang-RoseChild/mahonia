@@ -92,6 +92,9 @@ func (b *Reader) Read(p []byte) (n int, err os.Error) {
 			if b.err != nil {
 				rune = 0xfffd
 				size = b.w - b.r
+				if size == 0 {
+					break
+				}
 				status = INVALID_CHAR
 			} else if filled {
 				break
