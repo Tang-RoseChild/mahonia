@@ -3,7 +3,6 @@ package mahonia
 import (
 	"io"
 	"utf8"
-	"os"
 )
 
 // Writer implements character-set encoding for an io.Writer object.
@@ -23,7 +22,7 @@ func (e Encoder) NewWriter(wr io.Writer) *Writer {
 }
 
 // Write encodes and writes the data from p.
-func (w *Writer) Write(p []byte) (n int, err os.Error) {
+func (w *Writer) Write(p []byte) (n int, err error) {
 	n = len(p)
 
 	if len(w.inbuf) > 0 {
@@ -77,7 +76,7 @@ func (w *Writer) Write(p []byte) (n int, err os.Error) {
 	return
 }
 
-func (w *Writer) WriteRune(rune int) (size int, err os.Error) {
+func (w *Writer) WriteRune(rune int) (size int, err error) {
 	if len(w.inbuf) > 0 {
 		// There are leftover bytes, a partial UTF-8 sequence.
 		w.inbuf = w.inbuf[:0]

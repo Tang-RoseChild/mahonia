@@ -10,7 +10,6 @@ package mahonia
 import (
 	"io"
 	"utf8"
-	"os"
 )
 
 const (
@@ -23,7 +22,7 @@ type Reader struct {
 	rd     io.Reader
 	decode Decoder
 	r, w   int
-	err    os.Error
+	err    error
 }
 
 // NewReader creates a new Reader that uses the receiver to decode text.
@@ -57,7 +56,7 @@ func (b *Reader) fill() {
 // It calls Read at most once on the underlying Reader,
 // hence n may be less than len(p).
 // At EOF, the count will be zero and err will be os.EOF.
-func (b *Reader) Read(p []byte) (n int, err os.Error) {
+func (b *Reader) Read(p []byte) (n int, err error) {
 	n = len(p)
 	filled := false
 	if n == 0 {
@@ -123,7 +122,7 @@ func (b *Reader) Read(p []byte) (n int, err os.Error) {
 
 // ReadRune reads a single Unicode character and returns the
 // rune and its size in bytes.
-func (b *Reader) ReadRune() (rune int, size int, err os.Error) {
+func (b *Reader) ReadRune() (rune int, size int, err error) {
 read:
 	rune, size, status := b.decode(b.buf[b.r:b.w])
 
