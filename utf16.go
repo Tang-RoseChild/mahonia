@@ -1,7 +1,7 @@
 package mahonia
 
 import (
-	"utf16"
+	"unicode/utf16"
 )
 
 func init() {

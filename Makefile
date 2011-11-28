@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=mahonia
+TARG=mahonia.googlecode.com/hg
 
 GOFILES=charset.go \
 	utf8.go \

@@ -2,7 +2,7 @@ package mahonia
 
 import (
 	"io"
-	"utf8"
+	"unicode/utf8"
 )
 
 // Writer implements character-set encoding for an io.Writer object.

@@ -1,6 +1,6 @@
 package mahonia
 
-import "utf8"
+import "unicode/utf8"
 
 func init() {
 	RegisterCharset(&Charset{

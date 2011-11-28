@@ -1,6 +1,6 @@
 package mahonia
 
-import "utf8"
+import "unicode/utf8"
 
 // Translate enables a Decoder to implement go-charset's Translator interface.
 func (d Decoder) Translate(data []byte, eof bool) (n int, cdata []byte, err error) {

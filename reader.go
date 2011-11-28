@@ -9,7 +9,7 @@ package mahonia
 
 import (
 	"io"
-	"utf8"
+	"unicode/utf8"
 )
 
 const (
