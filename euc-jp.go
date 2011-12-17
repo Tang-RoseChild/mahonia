@@ -35,7 +35,7 @@ func makeEUCJPTable() {
 
 		b[1] = byte(jis0212>>8) | 128
 		b[2] = byte(jis0212) | 128
-		eucJPTable.AddCharacter(int(unicode), string(b[:3]))
+		eucJPTable.AddCharacter(rune(unicode), string(b[:3]))
 	}
 
 	for jis0208, unicode := range jis0208ToUnicode {
@@ -45,7 +45,7 @@ func makeEUCJPTable() {
 
 		b[0] = byte(jis0208>>8) | 128
 		b[1] = byte(jis0208) | 128
-		eucJPTable.AddCharacter(int(unicode), string(b[:2]))
+		eucJPTable.AddCharacter(rune(unicode), string(b[:2]))
 	}
 
 	b[0] = 0x8e
@@ -56,15 +56,15 @@ func makeEUCJPTable() {
 		}
 
 		b[1] = byte(i)
-		eucJPTable.AddCharacter(int(unicode), string(b[:2]))
+		eucJPTable.AddCharacter(rune(unicode), string(b[:2]))
 	}
 
-	for i := 0; i < 128; i++ {
-		var unicode int
+	for i := '\x00'; i < 128; i++ {
+		var unicode rune
 		if i < 32 || i == 127 {
 			unicode = i
 		} else {
-			unicode = int(jis0201ToUnicode[i])
+			unicode = rune(jis0201ToUnicode[i])
 			if unicode == 0 {
 				continue
 			}

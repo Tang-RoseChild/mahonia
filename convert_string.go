@@ -30,11 +30,11 @@ func (e Encoder) ConvertString(s string) string {
 // ConvertString converts a string from d's encoding to UTF-8.
 func (d Decoder) ConvertString(s string) string {
 	bytes := []byte(s)
-	runes := make([]int, len(s))
+	runes := make([]rune, len(s))
 	destPos := 0
 
 	for len(bytes) > 0 {
-		rune, size, status := d(bytes)
+		c, size, status := d(bytes)
 
 		if status == STATE_ONLY {
 			bytes = bytes[size:]
@@ -42,13 +42,13 @@ func (d Decoder) ConvertString(s string) string {
 		}
 
 		if status == NO_ROOM {
-			rune = 0xfffd
+			c = 0xfffd
 			size = len(bytes)
 			status = INVALID_CHAR
 		}
 
 		bytes = bytes[size:]
-		runes[destPos] = rune
+		runes[destPos] = c
 		destPos++
 	}
 

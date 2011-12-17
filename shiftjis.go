@@ -51,7 +51,7 @@ func makeSjisTable() {
 			b[1] = j2 + 126
 		}
 
-		sjisTable.AddCharacter(int(unicode), string(b[:]))
+		sjisTable.AddCharacter(rune(unicode), string(b[:]))
 	}
 
 	for jis0201, unicode := range jis0201ToUnicode {
@@ -59,10 +59,10 @@ func makeSjisTable() {
 			continue
 		}
 
-		sjisTable.AddCharacter(int(unicode), string(byte(jis0201)))
+		sjisTable.AddCharacter(rune(unicode), string(byte(jis0201)))
 	}
 
-	for i := 0; i < 32; i++ {
+	for i := '\x00'; i < 32; i++ {
 		sjisTable.AddCharacter(i, string(byte(i)))
 	}
 

@@ -122,9 +122,9 @@ func (b *Reader) Read(p []byte) (n int, err error) {
 
 // ReadRune reads a single Unicode character and returns the
 // rune and its size in bytes.
-func (b *Reader) ReadRune() (rune int, size int, err error) {
+func (b *Reader) ReadRune() (c rune, size int, err error) {
 read:
-	rune, size, status := b.decode(b.buf[b.r:b.w])
+	c, size, status := b.decode(b.buf[b.r:b.w])
 
 	if status == NO_ROOM && b.err == nil {
 		b.fill()
@@ -141,11 +141,11 @@ read:
 	}
 
 	if status == NO_ROOM {
-		rune = 0xfffd
+		c = 0xfffd
 		size = b.w - b.r
 		status = INVALID_CHAR
 	}
 
 	b.r += size
-	return rune, size, nil
+	return c, size, nil
 }

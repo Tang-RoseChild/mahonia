@@ -15,7 +15,7 @@ var utf16Charsets = []Charset{
 		Name: "UTF-16",
 		NewDecoder: func() Decoder {
 			var decodeRune Decoder
-			return func(p []byte) (rune, size int, status Status) {
+			return func(p []byte) (c rune, size int, status Status) {
 				if decodeRune == nil {
 					// haven't read the BOM yet
 					if len(p) < 2 {
@@ -40,7 +40,7 @@ var utf16Charsets = []Charset{
 		},
 		NewEncoder: func() Encoder {
 			wroteBOM := false
-			return func(p []byte, rune int) (size int, status Status) {
+			return func(p []byte, c rune) (size int, status Status) {
 				if !wroteBOM {
 					if len(p) < 2 {
 						status = NO_ROOM
@@ -53,7 +53,7 @@ var utf16Charsets = []Charset{
 					return 2, STATE_ONLY
 				}
 
-				return encodeUTF16beRune(p, rune)
+				return encodeUTF16beRune(p, c)
 			}
 		},
 	},
@@ -69,13 +69,13 @@ var utf16Charsets = []Charset{
 	},
 }
 
-func decodeUTF16beRune(p []byte) (rune, size int, status Status) {
+func decodeUTF16beRune(p []byte) (r rune, size int, status Status) {
 	if len(p) < 2 {
 		status = NO_ROOM
 		return
 	}
 
-	c := int(p[0])<<8 + int(p[1])
+	c := rune(p[0])<<8 + rune(p[1])
 
 	if utf16.IsSurrogate(c) {
 		if len(p) < 4 {
@@ -83,7 +83,7 @@ func decodeUTF16beRune(p []byte) (rune, size int, status Status) {
 			return
 		}
 
-		c2 := int(p[2])<<8 + int(p[3])
+		c2 := rune(p[2])<<8 + rune(p[3])
 		c = utf16.DecodeRune(c, c2)
 
 		if c == 0xfffd {
@@ -96,14 +96,14 @@ func decodeUTF16beRune(p []byte) (rune, size int, status Status) {
 	return c, 2, SUCCESS
 }
 
-func encodeUTF16beRune(p []byte, rune int) (size int, status Status) {
-	if rune < 0x10000 {
+func encodeUTF16beRune(p []byte, c rune) (size int, status Status) {
+	if c < 0x10000 {
 		if len(p) < 2 {
 			status = NO_ROOM
 			return
 		}
-		p[0] = byte(rune >> 8)
-		p[1] = byte(rune)
+		p[0] = byte(c >> 8)
+		p[1] = byte(c)
 		return 2, SUCCESS
 	}
 
@@ -111,7 +111,7 @@ func encodeUTF16beRune(p []byte, rune int) (size int, status Status) {
 		status = NO_ROOM
 		return
 	}
-	s1, s2 := utf16.EncodeRune(rune)
+	s1, s2 := utf16.EncodeRune(c)
 	p[0] = byte(s1 >> 8)
 	p[1] = byte(s1)
 	p[2] = byte(s2 >> 8)
@@ -119,13 +119,13 @@ func encodeUTF16beRune(p []byte, rune int) (size int, status Status) {
 	return 4, SUCCESS
 }
 
-func decodeUTF16leRune(p []byte) (rune, size int, status Status) {
+func decodeUTF16leRune(p []byte) (r rune, size int, status Status) {
 	if len(p) < 2 {
 		status = NO_ROOM
 		return
 	}
 
-	c := int(p[1])<<8 + int(p[0])
+	c := rune(p[1])<<8 + rune(p[0])
 
 	if utf16.IsSurrogate(c) {
 		if len(p) < 4 {
@@ -133,7 +133,7 @@ func decodeUTF16leRune(p []byte) (rune, size int, status Status) {
 			return
 		}
 
-		c2 := int(p[3])<<8 + int(p[2])
+		c2 := rune(p[3])<<8 + rune(p[2])
 		c = utf16.DecodeRune(c, c2)
 
 		if c == 0xfffd {
@@ -146,14 +146,14 @@ func decodeUTF16leRune(p []byte) (rune, size int, status Status) {
 	return c, 2, SUCCESS
 }
 
-func encodeUTF16leRune(p []byte, rune int) (size int, status Status) {
-	if rune < 0x10000 {
+func encodeUTF16leRune(p []byte, c rune) (size int, status Status) {
+	if c < 0x10000 {
 		if len(p) < 2 {
 			status = NO_ROOM
 			return
 		}
-		p[1] = byte(rune >> 8)
-		p[0] = byte(rune)
+		p[1] = byte(c >> 8)
+		p[0] = byte(c)
 		return 2, SUCCESS
 	}
 
@@ -161,7 +161,7 @@ func encodeUTF16leRune(p []byte, rune int) (size int, status Status) {
 		status = NO_ROOM
 		return
 	}
-	s1, s2 := utf16.EncodeRune(rune)
+	s1, s2 := utf16.EncodeRune(c)
 	p[1] = byte(s1 >> 8)
 	p[0] = byte(s1)
 	p[3] = byte(s2 >> 8)

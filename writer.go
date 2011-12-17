@@ -76,7 +76,7 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 	return
 }
 
-func (w *Writer) WriteRune(rune int) (size int, err error) {
+func (w *Writer) WriteRune(c rune) (size int, err error) {
 	if len(w.inbuf) > 0 {
 		// There are leftover bytes, a partial UTF-8 sequence.
 		w.inbuf = w.inbuf[:0]
@@ -90,7 +90,7 @@ func (w *Writer) WriteRune(rune int) (size int, err error) {
 	outpos := 0
 
 retry:
-	size, status := w.encode(w.outbuf[outpos:], rune)
+	size, status := w.encode(w.outbuf[outpos:], c)
 
 	if status == NO_ROOM {
 		w.outbuf = make([]byte, len(w.outbuf)*2)

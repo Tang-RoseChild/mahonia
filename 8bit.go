@@ -23,8 +23,8 @@ type eightBitInfo struct {
 	// true if the first 128 characters are the same as US-ASCII
 	asciiCompatible bool
 
-	byte2char [256]int
-	char2byte map[int]byte
+	byte2char [256]rune
+	char2byte map[rune]byte
 }
 
 const asciiRepertoire = "\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f"
@@ -39,15 +39,15 @@ func (info *eightBitInfo) register() {
 	cs.NewDecoder = func() Decoder {
 		info.once.Do(func() { info.unpack() })
 
-		return func(p []byte) (rune, size int, status Status) {
+		return func(p []byte) (c rune, size int, status Status) {
 			if len(p) == 0 {
 				status = NO_ROOM
 				return
 			}
 
-			rune = info.byte2char[p[0]]
+			c = info.byte2char[p[0]]
 
-			if rune == 0xfffd {
+			if c == 0xfffd {
 				status = INVALID_CHAR
 			} else {
 				status = SUCCESS
@@ -61,18 +61,18 @@ func (info *eightBitInfo) register() {
 	cs.NewEncoder = func() Encoder {
 		info.once.Do(func() { info.unpack() })
 
-		return func(p []byte, rune int) (size int, status Status) {
+		return func(p []byte, c rune) (size int, status Status) {
 			if len(p) == 0 {
 				status = NO_ROOM
 				return
 			}
 
-			if rune < 128 && info.asciiCompatible {
-				p[0] = byte(rune)
+			if c < 128 && info.asciiCompatible {
+				p[0] = byte(c)
 				return 1, SUCCESS
 			}
 
-			b, ok := info.char2byte[rune]
+			b, ok := info.char2byte[c]
 			if !ok {
 				b = info.SubstitutionChar
 				status = INVALID_CHAR
@@ -91,12 +91,12 @@ func (info *eightBitInfo) register() {
 func (info *eightBitInfo) unpack() {
 	info.asciiCompatible = info.Repertoire[:128] == asciiRepertoire
 
-	info.char2byte = make(map[int]byte, 256)
+	info.char2byte = make(map[rune]byte, 256)
 	i := 0
-	for _, rune := range info.Repertoire {
-		info.byte2char[i] = rune
-		if rune != 0xfffd {
-			info.char2byte[rune] = byte(i)
+	for _, c := range info.Repertoire {
+		info.byte2char[i] = c
+		if c != 0xfffd {
+			info.char2byte[c] = byte(i)
 		}
 		i++
 	}

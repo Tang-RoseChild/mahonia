@@ -14,7 +14,7 @@ package mahonia
 //
 // Note that the HTML5 list is larger than the HTML4 list at
 // http://www.w3.org/TR/html4/sgml/entities.html
-var entity = map[string]int{
+var entity = map[string]rune{
 	"AElig;":                           '\U000000C6',
 	"AMP;":                             '\U00000026',
 	"Aacute;":                          '\U000000C1',
@@ -2156,7 +2156,7 @@ var entity = map[string]int{
 }
 
 // HTML entities that are two unicode codepoints.
-var entity2 = map[string][2]int{
+var entity2 = map[string][2]rune{
 	"nLt;":                     {'\u226A', '\u20D2'},
 	"nGt;":                     {'\u226B', '\u20D2'},
 	"NotEqualTilde;":           {'\u2242', '\u0338'},

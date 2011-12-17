@@ -23,7 +23,7 @@ var asciiCharsets = []Charset{
 	},
 }
 
-func decodeASCIIRune(p []byte) (rune, size int, status Status) {
+func decodeASCIIRune(p []byte) (c rune, size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
@@ -33,17 +33,17 @@ func decodeASCIIRune(p []byte) (rune, size int, status Status) {
 	if b > 127 {
 		return 0xfffd, 1, INVALID_CHAR
 	}
-	return int(b), 1, SUCCESS
+	return rune(b), 1, SUCCESS
 }
 
-func encodeASCIIRune(p []byte, rune int) (size int, status Status) {
+func encodeASCIIRune(p []byte, c rune) (size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
 	}
 
-	if rune < 128 {
-		p[0] = byte(rune)
+	if c < 128 {
+		p[0] = byte(c)
 		return 1, SUCCESS
 	}
 
@@ -51,23 +51,23 @@ func encodeASCIIRune(p []byte, rune int) (size int, status Status) {
 	return 1, INVALID_CHAR
 }
 
-func decodeLatin1Rune(p []byte) (rune, size int, status Status) {
+func decodeLatin1Rune(p []byte) (c rune, size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
 	}
 
-	return int(p[0]), 1, SUCCESS
+	return rune(p[0]), 1, SUCCESS
 }
 
-func encodeLatin1Rune(p []byte, rune int) (size int, status Status) {
+func encodeLatin1Rune(p []byte, c rune) (size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
 	}
 
-	if rune < 256 {
-		p[0] = byte(rune)
+	if c < 256 {
+		p[0] = byte(c)
 		return 1, SUCCESS
 	}
 

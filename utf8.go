@@ -10,19 +10,19 @@ func init() {
 	})
 }
 
-func decodeUTF8Rune(p []byte) (rune, size int, status Status) {
+func decodeUTF8Rune(p []byte) (c rune, size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
 	}
 
 	if p[0] < 128 {
-		return int(p[0]), 1, SUCCESS
+		return rune(p[0]), 1, SUCCESS
 	}
 
-	rune, size = utf8.DecodeRune(p)
+	c, size = utf8.DecodeRune(p)
 
-	if rune == 0xfffd {
+	if c == 0xfffd {
 		if utf8.FullRune(p) {
 			status = INVALID_CHAR
 			return
@@ -35,11 +35,11 @@ func decodeUTF8Rune(p []byte) (rune, size int, status Status) {
 	return
 }
 
-func encodeUTF8Rune(p []byte, rune int) (size int, status Status) {
-	size = utf8.RuneLen(rune)
+func encodeUTF8Rune(p []byte, c rune) (size int, status Status) {
+	size = utf8.RuneLen(c)
 	if size > len(p) {
 		return 0, NO_ROOM
 	}
 
-	return utf8.EncodeRune(p, rune), SUCCESS
+	return utf8.EncodeRune(p, c), SUCCESS
 }

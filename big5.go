@@ -20,7 +20,7 @@ func init() {
 	})
 }
 
-func decodeBig5Rune(p []byte) (rune, size int, status Status) {
+func decodeBig5Rune(p []byte) (r rune, size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
@@ -28,7 +28,7 @@ func decodeBig5Rune(p []byte) (rune, size int, status Status) {
 
 	b := p[0]
 	if b < 128 {
-		return int(b), 1, SUCCESS
+		return rune(b), 1, SUCCESS
 	}
 
 	if len(p) < 2 {
@@ -39,20 +39,20 @@ func decodeBig5Rune(p []byte) (rune, size int, status Status) {
 	c := int(p[0])<<8 + int(p[1])
 	c = int(big5ToUnicode[c])
 	if c > 0 {
-		return c, 2, SUCCESS
+		return rune(c), 2, SUCCESS
 	}
 
 	return 0xfffd, 1, INVALID_CHAR
 }
 
-func encodeBig5Rune(p []byte, rune int) (size int, status Status) {
+func encodeBig5Rune(p []byte, r rune) (size int, status Status) {
 	if len(p) == 0 {
 		status = NO_ROOM
 		return
 	}
 
-	if rune < 128 {
-		p[0] = byte(rune)
+	if r < 128 {
+		p[0] = byte(r)
 		return 1, SUCCESS
 	}
 
@@ -61,8 +61,8 @@ func encodeBig5Rune(p []byte, rune int) (size int, status Status) {
 		return
 	}
 
-	if rune < 0x10000 {
-		c := unicodeToBig5[rune]
+	if r < 0x10000 {
+		c := unicodeToBig5[r]
 		if c > 0 {
 			p[0] = byte(c >> 8)
 			p[1] = byte(c)

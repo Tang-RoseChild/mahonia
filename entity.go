@@ -10,14 +10,14 @@ var entityOnce sync.Once
 
 // entityTrie is similar to mbcsTrie, but not identical.
 type htmlEntityTrie struct {
-	runes    [2]int // Some HTML entities decode to two characters.
+	runes    [2]rune // Some HTML entities decode to two characters.
 	children []htmlEntityTrie
 }
 
 var entityTrie htmlEntityTrie
 
 func buildEntityTrie() {
-	for e, rune := range entity {
+	for e, c := range entity {
 		current := &entityTrie
 		for i := 0; i < len(e); i++ {
 			if current.children == nil {
@@ -25,7 +25,7 @@ func buildEntityTrie() {
 			}
 			current = &current.children[e[i]]
 		}
-		current.runes[0] = rune
+		current.runes[0] = c
 	}
 
 	for e, runes := range entity2 {
@@ -45,12 +45,12 @@ func buildEntityTrie() {
 // So it needs to be combined with another Decoder via FallbackDecoder.
 func EntityDecoder() Decoder {
 	entityOnce.Do(buildEntityTrie)
-	leftover := 0 // leftover rune from two-rune entity
-	return func(p []byte) (rune, size int, status Status) {
+	var leftover rune // leftover rune from two-rune entity
+	return func(p []byte) (r rune, size int, status Status) {
 		if leftover != 0 {
-			rune = leftover
+			r = leftover
 			leftover = 0
-			return rune, 0, SUCCESS
+			return r, 0, SUCCESS
 		}
 
 		if len(p) == 0 {
@@ -65,7 +65,7 @@ func EntityDecoder() Decoder {
 			return 0, 1, NO_ROOM
 		}
 
-		rune, size, status = 0xfffd, 1, INVALID_CHAR
+		r, size, status = 0xfffd, 1, INVALID_CHAR
 		n := 1 // number of bytes read so far
 
 		if p[n] == '#' {
@@ -77,23 +77,23 @@ func EntityDecoder() Decoder {
 				n++
 			}
 
-			x := 0
+			var x rune
 			for n < len(p) {
 				c = p[n]
 				n++
 				if hex {
 					if '0' <= c && c <= '9' {
-						x = 16*x + int(c) - '0'
+						x = 16*x + rune(c) - '0'
 						continue
 					} else if 'a' <= c && c <= 'f' {
-						x = 16*x + int(c) - 'a' + 10
+						x = 16*x + rune(c) - 'a' + 10
 						continue
 					} else if 'A' <= c && c <= 'F' {
-						x = 16*x + int(c) - 'A' + 10
+						x = 16*x + rune(c) - 'A' + 10
 						continue
 					}
 				} else if '0' <= c && c <= '9' {
-					x = 10*x + int(c) - '0'
+					x = 10*x + rune(c) - '0'
 					continue
 				}
 				if c != ';' {
@@ -127,7 +127,7 @@ func EntityDecoder() Decoder {
 				return 0xfffd, size, INVALID_CHAR
 			}
 
-			rune = x
+			r = x
 			status = SUCCESS
 			return
 		}
@@ -142,7 +142,7 @@ func EntityDecoder() Decoder {
 			current = &current.children[p[n]]
 			n++
 			if current.runes[0] != 0 {
-				rune, leftover = current.runes[0], current.runes[1]
+				r, leftover = current.runes[0], current.runes[1]
 				size = n
 				status = SUCCESS
 				// but don't return yet, since we need the longest match
@@ -158,7 +158,7 @@ func EntityDecoder() Decoder {
 // These replacements permit compatibility with old numeric entities that 
 // assumed Windows-1252 encoding.
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
-var replacementTable = [...]int{
+var replacementTable = [...]rune{
 	'\u20AC', // First entry is what 0x80 should be replaced with.
 	'\u0081',
 	'\u201A',

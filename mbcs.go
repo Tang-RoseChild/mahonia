@@ -7,7 +7,7 @@ package mahonia
 // children either is nil or has 256 elements.
 type mbcsTrie struct {
 	// For leaf nodes, the Unicode character that is represented.
-	rune int
+	char rune
 
 	// For non-leaf nodes, the trie to decode the remainder of the character.
 	children []mbcsTrie
@@ -16,17 +16,17 @@ type mbcsTrie struct {
 // A MBCSTable holds the data to convert to and from Unicode.
 type MBCSTable struct {
 	toUnicode   mbcsTrie
-	fromUnicode map[int]string
+	fromUnicode map[rune]string
 }
 
 // AddCharacter adds a character to the table. rune is its Unicode code point, 
 // and bytes contains the bytes used to encode it in the character set.
-func (table *MBCSTable) AddCharacter(rune int, bytes string) {
+func (table *MBCSTable) AddCharacter(c rune, bytes string) {
 	if table.fromUnicode == nil {
-		table.fromUnicode = make(map[int]string)
+		table.fromUnicode = make(map[rune]string)
 	}
 
-	table.fromUnicode[rune] = bytes
+	table.fromUnicode[c] = bytes
 
 	trie := &table.toUnicode
 	for i := 0; i < len(bytes); i++ {
@@ -38,11 +38,11 @@ func (table *MBCSTable) AddCharacter(rune int, bytes string) {
 		trie = &trie.children[b]
 	}
 
-	trie.rune = rune
+	trie.char = c
 }
 
 func (table *MBCSTable) Decoder() Decoder {
-	return func(p []byte) (rune, size int, status Status) {
+	return func(p []byte) (c rune, size int, status Status) {
 		if len(p) == 0 {
 			status = NO_ROOM
 			return
@@ -53,7 +53,7 @@ func (table *MBCSTable) Decoder() Decoder {
 		}
 
 		trie := &table.toUnicode
-		for trie.rune == 0 {
+		for trie.char == 0 {
 			if trie.children == nil {
 				return 0xfffd, 1, INVALID_CHAR
 			}
@@ -65,15 +65,15 @@ func (table *MBCSTable) Decoder() Decoder {
 			size++
 		}
 
-		rune = trie.rune
+		c = trie.char
 		status = SUCCESS
 		return
 	}
 }
 
 func (table *MBCSTable) Encoder() Encoder {
-	return func(p []byte, rune int) (size int, status Status) {
-		bytes := table.fromUnicode[rune]
+	return func(p []byte, c rune) (size int, status Status) {
+		bytes := table.fromUnicode[c]
 		if bytes == "" {
 			if len(p) > 0 {
 				p[0] = '?'
