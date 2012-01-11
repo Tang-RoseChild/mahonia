@@ -1,8 +1,8 @@
 package mahonia
 
 import (
-	"sync"
 	"fmt"
+	"sync"
 )
 
 // Converters for simple 8-bit character sets.

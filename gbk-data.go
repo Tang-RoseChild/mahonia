@@ -2,6 +2,7 @@ package mahonia
 
 // Data for GBK 2-byte codes.
 // GBK codes are represented in big-endian order.
+// Based on the 2-byte subset of http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/gb-18030-2005.ucm
 
 // Codes that aren't on the BMP.
 var unicodeToGBKExtra = map[rune]uint16{
