@@ -3,48 +3,13 @@ package mahonia
 // decoding HTML entities
 
 import (
-	"sync"
+	"sort"
 )
-
-var entityOnce sync.Once
-
-// entityTrie is similar to mbcsTrie, but not identical.
-type htmlEntityTrie struct {
-	runes    [2]rune // Some HTML entities decode to two characters.
-	children []htmlEntityTrie
-}
-
-var entityTrie htmlEntityTrie
-
-func buildEntityTrie() {
-	for e, c := range entity {
-		current := &entityTrie
-		for i := 0; i < len(e); i++ {
-			if current.children == nil {
-				current.children = make([]htmlEntityTrie, 256)
-			}
-			current = &current.children[e[i]]
-		}
-		current.runes[0] = c
-	}
-
-	for e, runes := range entity2 {
-		current := &entityTrie
-		for i := 0; i < len(e); i++ {
-			if current.children == nil {
-				current.children = make([]htmlEntityTrie, 256)
-			}
-			current = &current.children[e[i]]
-		}
-		current.runes = runes
-	}
-}
 
 // EntityDecoder returns a Decoder that decodes HTML character entities.
 // If there is no valid character entity at the current position, it returns INVALID_CHAR.
 // So it needs to be combined with another Decoder via FallbackDecoder.
 func EntityDecoder() Decoder {
-	entityOnce.Do(buildEntityTrie)
 	var leftover rune // leftover rune from two-rune entity
 	return func(p []byte) (r rune, size int, status Status) {
 		if leftover != 0 {
@@ -132,17 +97,35 @@ func EntityDecoder() Decoder {
 			return
 		}
 
-		current := &entityTrie
-		for current.children != nil {
+		// Look for a named entity in EntityList.
+
+		possible := entityList
+		for len(possible) > 0 {
 			if len(p) <= n {
 				leftover = 0
 				return 0, 0, NO_ROOM
 			}
 
-			current = &current.children[p[n]]
+			c := p[n]
+
+			// Narrow down the selection in possible to those items that have c in the
+			// appropriate byte.
+			first := sort.Search(len(possible), func(i int) bool {
+				e := possible[i].name
+				if len(e) < n {
+					return false
+				}
+				return e[n-1] >= c
+			})
+			possible = possible[first:]
+			last := sort.Search(len(possible), func(i int) bool {
+				return possible[i].name[n-1] > c
+			})
+			possible = possible[:last]
+
 			n++
-			if current.runes[0] != 0 {
-				r, leftover = current.runes[0], current.runes[1]
+			if len(possible) > 0 && len(possible[0].name) == n-1 {
+				r, leftover = possible[0].r1, possible[0].r2
 				size = n
 				status = SUCCESS
 				// but don't return yet, since we need the longest match
