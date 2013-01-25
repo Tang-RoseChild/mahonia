@@ -12,7 +12,7 @@ package mahonia
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/named-character-references.html
 // lists both "amp" and "amp;" as two separate entries.
 //
-// Most entities translate to a single rune (r1); a few translate to two (r1 and r2). 
+// Most entities translate to a single rune (r1); a few translate to two (r1 and r2).
 //
 // Note that the HTML5 list is larger than the HTML4 list at
 // http://www.w3.org/TR/html4/sgml/entities.html
