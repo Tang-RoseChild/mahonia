@@ -172,3 +172,46 @@ func TestEntities(t *testing.T) {
 		t.Errorf("Unexpected value: %#v (expected %#v)", result, plain)
 	}
 }
+
+func TestConvertStringOK(t *testing.T) {
+	d := NewDecoder("ASCII")
+	if d == nil {
+		t.Fatal("Could not create decoder for ASCII")
+	}
+
+	str, ok := d.ConvertStringOK("hello")
+	if !ok {
+		t.Error("Spurious error found while decoding")
+	}
+	if str != "hello" {
+		t.Errorf("expected %#v, got %#v", "hello", str)
+	}
+
+	str, ok = d.ConvertStringOK("\x80")
+	if ok {
+		t.Error(`Failed to detect error decoding "\x80"`)
+	}
+
+	e := NewEncoder("ISO-8859-3")
+	if e == nil {
+		t.Fatal("Could not create encoder for ISO-8859-1")
+	}
+
+	str, ok = e.ConvertStringOK("nutraĵo")
+	if !ok {
+		t.Error("spurious error while encoding")
+	}
+	if str != "nutra\xbco" {
+		t.Errorf("expected %#v, got %#v", "nutra\xbco", str)
+	}
+
+	str, ok = e.ConvertStringOK("\x80abc")
+	if ok {
+		t.Error("failed to detect invalid UTF-8 while encoding")
+	}
+
+	str, ok = e.ConvertStringOK("русский")
+	if ok {
+		t.Error("failed to detect characters that couldn't be encoded")
+	}
+}
