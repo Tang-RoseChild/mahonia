@@ -64,6 +64,7 @@ var testData = []struct {
 	{"これは漢字です。", "\x82\xb1\x82\xea\x82\xcd\x8a\xbf\x8e\x9a\x82\xc5\x82\xb7\x81B", "SJIS"},
 	{"これは漢字です。", "\xa4\xb3\xa4\xec\xa4\u03f4\xc1\xbb\xfa\xa4\u01e4\xb9\xa1\xa3", "EUC-JP"},
 	{"Thông tin bạn đồng hànhỌ", "Th\xabng tin b\xb9n \xae\xe5ng h\xb5nhO\xe4", "TCVN3"},
+	{"Hello, 世界!", "Hello, \x1b$B@$3&\x1b(B!", "ISO-2022-JP"},
 }
 
 func TestDecode(t *testing.T) {

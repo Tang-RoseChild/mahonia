@@ -1,5 +1,22 @@
 package mahonia
 
+import (
+	"sync"
+)
+
+var jis0208Once sync.Once
+
+var unicodeToJIS0208 []uint16
+
+func reverseJIS0208Table() {
+	unicodeToJIS0208 = make([]uint16, 65536)
+	for jis, unicode := range jis0208ToUnicode {
+		if unicode != 0 {
+			unicodeToJIS0208[unicode] = uint16(jis)
+		}
+	}
+}
+
 var jis0208ToUnicode = [65536]uint16{
 	0x2121: 0x3000, // IDEOGRAPHIC SPACE
 	0x2122: 0x3001, // IDEOGRAPHIC COMMA
