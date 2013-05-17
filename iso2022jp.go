@@ -71,20 +71,13 @@ func init() {
 					return rune(b), 1, SUCCESS
 
 				case jisX0208:
-					if len(p) < 2 {
-						return 0, 0, NO_ROOM
-					}
-					u := jis0208ToUnicode[int(p[0])<<8+int(p[1])]
-					if u == 0 {
-						return utf8.RuneError, 2, INVALID_CHAR
-					}
-					return rune(u), 2, SUCCESS
+					return jis0208Table.DecodeLow(p)
 				}
 				panic("unreachable")
 			}
 		},
 		NewEncoder: func() Encoder {
-			jis0208Once.Do(reverseJIS0208Table)
+			jis0208Table.Reverse()
 			encoding := ascii
 			return func(p []byte, c rune) (size int, status Status) {
 				if len(p) == 0 {
@@ -108,8 +101,8 @@ func init() {
 				if c > 65535 {
 					return 0, INVALID_CHAR
 				}
-				jis := unicodeToJIS0208[c]
-				if jis == 0 {
+				jis := jis0208Table.FromUnicode[c]
+				if jis == [2]byte{0, 0} && c != rune(jis0208Table.Data[0][0]) {
 					return 0, INVALID_CHAR
 				}
 
@@ -122,8 +115,8 @@ func init() {
 					return 3, STATE_ONLY
 				}
 
-				p[0] = byte(jis >> 8)
-				p[1] = byte(jis)
+				p[0] = jis[0] + 0x21
+				p[1] = jis[1] + 0x21
 				return 2, SUCCESS
 			}
 		},

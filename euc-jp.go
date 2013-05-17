@@ -1,75 +1,102 @@
 package mahonia
 
-// Converters for the EUC-JP encoding
-
 import (
-	"sync"
+	"unicode/utf8"
 )
+
+// Converters for the EUC-JP encoding
 
 func init() {
 	RegisterCharset(&Charset{
 		Name:    "EUC-JP",
 		Aliases: []string{"extended_unix_code_packed_format_for_japanese", "cseucpkdfmtjapanese"},
 		NewDecoder: func() Decoder {
-			eucJPOnce.Do(makeEUCJPTable)
-			return eucJPTable.Decoder()
+			return decodeEucJP
 		},
 		NewEncoder: func() Encoder {
-			eucJPOnce.Do(makeEUCJPTable)
-			return eucJPTable.Encoder()
+			jis0208Table.Reverse()
+			jis0212Table.Reverse()
+			return encodeEucJP
 		},
 	})
 }
 
-var eucJPOnce sync.Once
-var eucJPTable MBCSTable
-
-func makeEUCJPTable() {
-	var b [3]byte
-
-	b[0] = 0x8f
-	for jis0212, unicode := range jis0212ToUnicode {
-		if unicode == 0 {
-			continue
-		}
-
-		b[1] = byte(jis0212>>8) | 128
-		b[2] = byte(jis0212) | 128
-		eucJPTable.AddCharacter(rune(unicode), string(b[:3]))
+func decodeEucJP(p []byte) (c rune, size int, status Status) {
+	if len(p) == 0 {
+		return 0, 0, NO_ROOM
 	}
 
-	for jis0208, unicode := range jis0208ToUnicode {
-		if unicode == 0 {
-			continue
-		}
+	b := p[0]
+	switch {
+	case b < 0x80:
+		return rune(b), 1, SUCCESS
 
-		b[0] = byte(jis0208>>8) | 128
-		b[1] = byte(jis0208) | 128
-		eucJPTable.AddCharacter(rune(unicode), string(b[:2]))
+	case b == 0x8e:
+		if len(p) < 2 {
+			return 0, 0, NO_ROOM
+		}
+		b2 := p[1]
+		if b2 < 0xa1 || b2 > 0xdf {
+			return utf8.RuneError, 1, INVALID_CHAR
+		}
+		return rune(b2) + (0xff61 - 0xa1), 2, SUCCESS
+
+	case b == 0x8f:
+		if len(p) < 3 {
+			return 0, 0, NO_ROOM
+		}
+		c, size, status = jis0212Table.DecodeHigh(p[1:3])
+		if status == SUCCESS {
+			size = 3
+		}
+		return
+
+	case 0xa1 <= b && b <= 0xfe:
+		return jis0208Table.DecodeHigh(p)
 	}
 
-	b[0] = 0x8e
-	for i := 128; i < 256; i++ {
-		unicode := jis0201ToUnicode[i]
-		if unicode == 0 {
-			continue
-		}
+	return utf8.RuneError, 1, INVALID_CHAR
+}
 
-		b[1] = byte(i)
-		eucJPTable.AddCharacter(rune(unicode), string(b[:2]))
+func encodeEucJP(p []byte, c rune) (size int, status Status) {
+	if len(p) == 0 {
+		return 0, NO_ROOM
 	}
 
-	for i := '\x00'; i < 128; i++ {
-		var unicode rune
-		if i < 32 || i == 127 {
-			unicode = i
-		} else {
-			unicode = rune(jis0201ToUnicode[i])
-			if unicode == 0 {
-				continue
-			}
-		}
-
-		eucJPTable.AddCharacter(unicode, string(byte(i)))
+	if c < 0x80 {
+		p[0] = byte(c)
+		return 1, SUCCESS
 	}
+
+	if len(p) < 2 {
+		return 0, NO_ROOM
+	}
+
+	if c > 0xffff {
+		p[0] = '?'
+		return 1, INVALID_CHAR
+	}
+
+	if 0xff61 <= c && c <= 0xff9f {
+		p[0] = 0x8e
+		p[1] = byte(c - (0xff61 - 0xa1))
+		return 2, SUCCESS
+	}
+
+	size, status = jis0208Table.EncodeHigh(p, c)
+	if status == SUCCESS {
+		return size, status
+	}
+
+	size, status = jis0212Table.EncodeHigh(p[1:], c)
+	switch status {
+	case SUCCESS:
+		p[0] = 0x8f
+		return size + 1, SUCCESS
+
+	case INVALID_CHAR:
+		p[0] = '?'
+		return 1, INVALID_CHAR
+	}
+	return size, status
 }
