@@ -220,3 +220,10 @@ func TestConvertStringOK(t *testing.T) {
 		t.Error("failed to detect characters that couldn't be encoded")
 	}
 }
+
+func TestBadCharset(t *testing.T) {
+	d := NewDecoder("this is not a valid charset")
+	if d != nil {
+		t.Fatal("got a non-nil decoder for an invalid charset")
+	}
+}
