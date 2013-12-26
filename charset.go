@@ -1,4 +1,7 @@
 // This package is a character-set conversion library for Go.
+//
+// (DEPRECATED: use code.google.com/p/go.text/encoding, perhaps along with
+// code.google.com/p/go.net/html/charset)
 package mahonia
 
 import (
